@@ -12,7 +12,6 @@ const ZoneDetail = () => {
   const [events, setEvents] = useState([])
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [hour, setHour] = useState(new Date().getHours())
-  const [dayOfWeek, setDayOfWeek] = useState(new Date().getDay() === 0 ? 6 : new Date().getDay() - 1)
   
   const { makePrediction, loading, error, prediction } = usePrediction()
 
@@ -21,11 +20,11 @@ const ZoneDetail = () => {
   }, [zoneId])
 
   useEffect(() => {
-    if (zoneId && date && hour !== null && dayOfWeek !== null) {
-      makePrediction(Number(zoneId), date, hour, dayOfWeek)
+    if (zoneId && date && hour !== null) {
+      makePrediction(Number(zoneId), date, hour)
       loadEvents()
     }
-  }, [zoneId, date, hour, dayOfWeek])
+  }, [zoneId, date, hour])
 
   const loadZoneData = async () => {
     try {
@@ -47,9 +46,6 @@ const ZoneDetail = () => {
 
   const handleDateChange = (newDate) => {
     setDate(newDate)
-    const selectedDate = new Date(newDate)
-    const day = selectedDate.getDay() === 0 ? 6 : selectedDate.getDay() - 1
-    setDayOfWeek(day)
   }
 
   if (!zone) {
@@ -71,10 +67,8 @@ const ZoneDetail = () => {
               <TimePicker
                 date={date}
                 hour={hour}
-                dayOfWeek={dayOfWeek}
                 onDateChange={handleDateChange}
                 onHourChange={setHour}
-                onDayChange={setDayOfWeek}
               />
             </div>
 

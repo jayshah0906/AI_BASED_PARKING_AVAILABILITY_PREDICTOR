@@ -12,7 +12,6 @@ const Dashboard = () => {
   const [selectedZone, setSelectedZone] = useState(null)
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [hour, setHour] = useState(new Date().getHours())
-  const [dayOfWeek, setDayOfWeek] = useState(new Date().getDay() === 0 ? 6 : new Date().getDay() - 1)
   
   const { makePrediction, loading, error, prediction } = usePrediction()
 
@@ -21,10 +20,10 @@ const Dashboard = () => {
   }, [])
 
   useEffect(() => {
-    if (selectedZone !== null && date && hour !== null && dayOfWeek !== null) {
-      makePrediction(selectedZone, date, hour, dayOfWeek)
+    if (selectedZone !== null && date && hour !== null) {
+      makePrediction(selectedZone, date, hour)
     }
-  }, [selectedZone, date, hour, dayOfWeek])
+  }, [selectedZone, date, hour])
 
   const loadZones = async () => {
     try {
@@ -41,10 +40,6 @@ const Dashboard = () => {
 
   const handleDateChange = (newDate) => {
     setDate(newDate)
-    // Update day of week based on selected date
-    const selectedDate = new Date(newDate)
-    const day = selectedDate.getDay() === 0 ? 6 : selectedDate.getDay() - 1
-    setDayOfWeek(day)
   }
 
   return (
@@ -73,10 +68,8 @@ const Dashboard = () => {
               <TimePicker
                 date={date}
                 hour={hour}
-                dayOfWeek={dayOfWeek}
                 onDateChange={handleDateChange}
                 onHourChange={setHour}
-                onDayChange={setDayOfWeek}
               />
             </div>
           </div>

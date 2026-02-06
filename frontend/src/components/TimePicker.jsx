@@ -1,8 +1,7 @@
 import React from 'react'
-import { DAYS_OF_WEEK } from '../utils/constants'
 import './TimePicker.css'
 
-const TimePicker = ({ date, hour, dayOfWeek, onDateChange, onHourChange, onDayChange }) => {
+const TimePicker = ({ date, hour, onDateChange, onHourChange }) => {
   const hours = Array.from({ length: 24 }, (_, i) => i)
 
   return (
@@ -19,24 +18,6 @@ const TimePicker = ({ date, hour, dayOfWeek, onDateChange, onHourChange, onDayCh
           onChange={(e) => onDateChange(e.target.value)}
           min={new Date().toISOString().split('T')[0]}
         />
-      </div>
-
-      <div className="time-picker-group">
-        <label htmlFor="day-select" className="time-picker-label">
-          Day of Week:
-        </label>
-        <select
-          id="day-select"
-          className="time-picker-select"
-          value={dayOfWeek}
-          onChange={(e) => onDayChange(Number(e.target.value))}
-        >
-          {DAYS_OF_WEEK.map((day, index) => (
-            <option key={index} value={index}>
-              {day}
-            </option>
-          ))}
-        </select>
       </div>
 
       <div className="time-picker-group">

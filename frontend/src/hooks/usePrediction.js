@@ -6,10 +6,14 @@ export const usePrediction = () => {
   const [error, setError] = useState(null)
   const [prediction, setPrediction] = useState(null)
 
-  const makePrediction = async (zoneId, date, hour, dayOfWeek) => {
+  const makePrediction = async (zoneId, date, hour) => {
     setLoading(true)
     setError(null)
     setPrediction(null)
+
+    // Derive day of week from date (Monday=0, Sunday=6) for API
+    const d = new Date(date)
+    const dayOfWeek = d.getDay() === 0 ? 6 : d.getDay() - 1
 
     try {
       const result = await predictAvailability({

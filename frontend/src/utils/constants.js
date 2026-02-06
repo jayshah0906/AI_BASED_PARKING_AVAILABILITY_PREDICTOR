@@ -1,15 +1,5 @@
 export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'
 
-export const DAYS_OF_WEEK = [
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
-  'Sunday'
-]
-
 export const AVAILABILITY_COLORS = {
   High: '#10b981', // green
   Medium: '#f59e0b', // amber

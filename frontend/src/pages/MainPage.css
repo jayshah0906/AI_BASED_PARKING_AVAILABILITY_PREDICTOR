@@ -34,20 +34,10 @@ body {
 
 /* Hero Section */
 .uber-hero {
-  background: var(--uber-black);
-  color: var(--uber-white);
-  padding: 80px 20px 120px;
-  position: relative;
-}
-
-.uber-hero::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 60px;
-  background: linear-gradient(to bottom, transparent, var(--uber-white));
+  background: var(--uber-white);
+  color: var(--uber-black);
+  padding: 60px 20px 40px;
+  border-bottom: 1px solid var(--uber-gray-200);
 }
 
 .uber-container {
@@ -58,26 +48,32 @@ body {
 }
 
 .uber-title {
-  font-size: 52px;
+  font-size: 42px;
   font-weight: 700;
-  margin-bottom: 16px;
-  letter-spacing: -1px;
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+  color: var(--uber-black);
 }
 
 .uber-subtitle {
-  font-size: 20px;
-  color: var(--uber-gray-300);
-  margin-bottom: 48px;
+  font-size: 18px;
+  color: var(--uber-gray-500);
+  margin-bottom: 32px;
   font-weight: 400;
 }
 
 /* Input Card */
 .uber-input-card {
   background: var(--uber-white);
-  border-radius: 8px;
-  padding: 32px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 2px solid var(--uber-black);
+  border-radius: 12px;
+  padding: 28px;
   max-width: 600px;
+  transition: all 0.2s ease;
+}
+
+.uber-input-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 .uber-input-group {
@@ -99,10 +95,10 @@ body {
 }
 
 .uber-input {
-  padding: 16px;
-  border: 1px solid var(--uber-gray-200);
+  padding: 14px 16px;
+  border: 2px solid var(--uber-gray-300);
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 500;
   color: var(--uber-black);
   background: var(--uber-white);
@@ -111,18 +107,18 @@ body {
 }
 
 .uber-input:hover {
-  border-color: var(--uber-gray-400);
+  border-color: var(--uber-gray-500);
 }
 
 .uber-input:focus {
   border-color: var(--uber-black);
-  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.05);
 }
 
 /* Results Section */
 .uber-results {
-  min-height: calc(100vh - 400px);
-  background: var(--uber-gray-50);
+  min-height: calc(100vh - 300px);
+  background: var(--uber-white);
 }
 
 .uber-container-full {
@@ -133,7 +129,8 @@ body {
 .uber-split {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  min-height: calc(100vh - 400px);
+  min-height: calc(100vh - 300px);
+  border-top: 1px solid var(--uber-gray-200);
 }
 
 /* Map Side */
@@ -141,19 +138,21 @@ body {
   background: var(--uber-white);
   display: flex;
   flex-direction: column;
-  border-right: 1px solid var(--uber-gray-200);
+  border-right: 2px solid var(--uber-black);
 }
 
 .uber-map-header {
-  padding: 32px;
-  border-bottom: 1px solid var(--uber-gray-200);
+  padding: 40px;
+  border-bottom: 2px solid var(--uber-black);
+  background: var(--uber-white);
 }
 
 .uber-map-header h2 {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 700;
   color: var(--uber-black);
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  letter-spacing: -0.5px;
 }
 
 .uber-legend {
@@ -164,16 +163,18 @@ body {
 .uber-legend-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-size: 14px;
-  color: var(--uber-gray-600);
-  font-weight: 500;
+  color: var(--uber-gray-700);
+  font-weight: 600;
 }
 
 .uber-dot {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
+  border: 2px solid var(--uber-white);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .uber-map {
@@ -183,10 +184,10 @@ body {
 
 /* Details Side */
 .uber-details-side {
-  background: var(--uber-gray-50);
-  padding: 32px;
+  background: var(--uber-white);
+  padding: 40px;
   overflow-y: auto;
-  max-height: calc(100vh - 400px);
+  max-height: calc(100vh - 300px);
 }
 
 /* Empty State */
@@ -226,20 +227,21 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
+  padding: 18px 24px;
   background: var(--uber-white);
-  border: 1px solid var(--uber-gray-200);
-  border-radius: 8px;
+  border: 2px solid var(--uber-gray-200);
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--uber-black);
 }
 
 .uber-zone-button:hover {
   border-color: var(--uber-black);
-  transform: translateX(4px);
+  transform: translateX(8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .uber-zone-name {
@@ -247,10 +249,12 @@ body {
 }
 
 .uber-zone-indicator {
-  width: 12px;
-  height: 12px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   flex-shrink: 0;
+  border: 2px solid var(--uber-white);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Loading */
@@ -288,11 +292,11 @@ body {
 .uber-alert {
   display: flex;
   gap: 16px;
-  padding: 20px;
-  background: #FFF4E5;
-  border: 1px solid #FFE0B2;
-  border-radius: 8px;
-  margin-bottom: 24px;
+  padding: 20px 24px;
+  background: #FFF9E6;
+  border: 2px solid var(--uber-amber);
+  border-radius: 12px;
+  margin-bottom: 28px;
 }
 
 .uber-alert-icon {
@@ -334,10 +338,11 @@ body {
 }
 
 .uber-predictions-header h2 {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 700;
   color: var(--uber-black);
   margin-bottom: 8px;
+  letter-spacing: -0.5px;
 }
 
 .uber-confidence {
@@ -350,22 +355,22 @@ body {
 .uber-predictions-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 20px;
 }
 
 .uber-prediction-card {
   background: var(--uber-white);
-  border: 1px solid var(--uber-gray-200);
+  border: 2px solid var(--uber-gray-200);
   border-radius: 12px;
-  padding: 20px;
+  padding: 24px;
   transition: all 0.2s ease;
   cursor: default;
 }
 
 .uber-prediction-card:hover {
-  border-color: var(--uber-gray-400);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transform: translateY(-2px);
+  border-color: var(--uber-black);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .uber-card-header {
@@ -382,13 +387,14 @@ body {
 }
 
 .uber-card-badge {
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--uber-white);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .uber-card-body {
@@ -404,10 +410,11 @@ body {
 }
 
 .uber-card-number {
-  font-size: 36px;
-  font-weight: 700;
+  font-size: 40px;
+  font-weight: 800;
   color: var(--uber-black);
   line-height: 1;
+  letter-spacing: -1px;
 }
 
 .uber-card-label {

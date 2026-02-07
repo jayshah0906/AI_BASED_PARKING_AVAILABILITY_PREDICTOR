@@ -40,7 +40,7 @@ python scripts/seed_zones.py
 python run_server.py
 ```
 
-Backend runs on `http://localhost:8000`
+Backend runs on `http://localhost:8001`
 
 ### Frontend Setup
 
@@ -62,8 +62,8 @@ Frontend runs on `http://localhost:5173`
 ## API Documentation
 
 Once the backend is running, visit:
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
+- Swagger UI: `http://localhost:8001/docs`
+- ReDoc: `http://localhost:8001/redoc`
 
 See [API_SPEC.md](docs/API_SPEC.md) for detailed API documentation.
 

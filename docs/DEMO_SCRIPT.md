@@ -35,8 +35,8 @@ python scripts/import_data.py
 python run_server.py
 ```
 
-The API will be available at `http://localhost:8000`
-API documentation at `http://localhost:8000/docs`
+The API will be available at `http://localhost:8001`
+API documentation at `http://localhost:8001/docs`
 
 ### Frontend Setup
 
@@ -117,17 +117,17 @@ The frontend will be available at `http://localhost:5173`
 
 ### Test Health Endpoint
 ```bash
-curl http://localhost:8000/api/v1/health
+curl http://localhost:8001/api/v1/health
 ```
 
 ### Test Zones Endpoint
 ```bash
-curl http://localhost:8000/api/v1/zones
+curl http://localhost:8001/api/v1/zones
 ```
 
 ### Test Prediction Endpoint
 ```bash
-curl -X POST http://localhost:8000/api/v1/predict \
+curl -X POST http://localhost:8001/api/v1/predict \
   -H "Content-Type: application/json" \
   -d '{
     "zone_id": 1,

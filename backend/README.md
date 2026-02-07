@@ -20,4 +20,4 @@ python3 run_server.py
 
 (If `python` works on your system, you can use `python run_server.py` instead.)
 
-API: http://localhost:8000 — Docs: http://localhost:8000/docs
+API: http://localhost:8001 — Docs: http://localhost:8001/docs

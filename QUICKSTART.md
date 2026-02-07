@@ -38,9 +38,9 @@ python scripts/import_data.py
 python run_server.py
 ```
 
-The backend API will be running at `http://localhost:8000`
-- API Docs: `http://localhost:8000/docs`
-- Health Check: `http://localhost:8000/api/v1/health`
+The backend API will be running at `http://localhost:8001`
+- API Docs: `http://localhost:8001/docs`
+- Health Check: `http://localhost:8001/api/v1/health`
 
 ### 2. Frontend Setup
 
@@ -72,13 +72,13 @@ The frontend will be running at `http://localhost:5173`
 
 ```bash
 # Health check
-curl http://localhost:8000/api/v1/health
+curl http://localhost:8001/api/v1/health
 
 # Get all zones
-curl http://localhost:8000/api/v1/zones
+curl http://localhost:8001/api/v1/zones
 
 # Make a prediction
-curl -X POST http://localhost:8000/api/v1/predict \
+curl -X POST http://localhost:8001/api/v1/predict \
   -H "Content-Type: application/json" \
   -d '{
     "zone_id": 1,
@@ -90,14 +90,14 @@ curl -X POST http://localhost:8000/api/v1/predict \
 
 ### Using the Swagger UI:
 
-Visit `http://localhost:8000/docs` for an interactive API documentation interface.
+Visit `http://localhost:8001/docs` for an interactive API documentation interface.
 
 ## Troubleshooting
 
 ### Backend Issues
 
-**Port 8000 already in use:**
-- Change the port in `backend/run_server.py` or kill the process using port 8000
+**Port 8001 already in use:**
+- Change the port in `backend/run_server.py` or kill the process using port 8001
 
 **Module not found errors:**
 - Ensure virtual environment is activated
@@ -109,7 +109,7 @@ Visit `http://localhost:8000/docs` for an interactive API documentation interfac
 ### Frontend Issues
 
 **Cannot connect to API:**
-- Ensure backend is running on port 8000
+- Ensure backend is running on port 8001
 - Check `frontend/.env` file has correct API URL
 - Verify CORS settings in `backend/app/config.py`
 

@@ -1,4 +1,4 @@
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1'
+export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001/api/v1'
 
 export const AVAILABILITY_COLORS = {
   High: '#10b981', // green

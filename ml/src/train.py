@@ -18,13 +18,21 @@ def load_data():
     """Load historical parking data and events"""
     print("Loading data...")
     
+    # Get paths relative to script location
+    import os
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    ml_dir = os.path.dirname(script_dir)
+    data_dir = os.path.join(ml_dir, 'data', 'processed')
+    
     # Load parking data
-    parking_df = pd.read_json('ml/data/processed/parking_data.json')
+    parking_path = os.path.join(data_dir, 'parking_data.json')
+    parking_df = pd.read_json(parking_path)
     parking_df['datetime'] = pd.to_datetime(parking_df['datetime'])
     
     # Load events - use json.load to preserve list types
     import json
-    with open('ml/data/processed/events.json', 'r') as f:
+    events_path = os.path.join(data_dir, 'events.json')
+    with open(events_path, 'r') as f:
         events_data = json.load(f)
     events_df = pd.DataFrame(events_data)
     
@@ -92,8 +100,17 @@ def save_model(model, metrics, feature_importance):
     """Save trained model and metadata"""
     print(f"\nSaving model to {MODEL_PATH}...")
     
+    # Get absolute path
+    import os
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    ml_dir = os.path.dirname(script_dir)
+    models_dir = os.path.join(ml_dir, 'models')
+    
+    # Ensure directory exists
+    os.makedirs(models_dir, exist_ok=True)
+    
     # Save model
-    model_file = f"{MODEL_PATH}parking_model.pkl"
+    model_file = os.path.join(models_dir, 'parking_model.pkl')
     joblib.dump(model, model_file)
     print(f"Model saved: {model_file}")
     
@@ -107,7 +124,7 @@ def save_model(model, metrics, feature_importance):
         'feature_importance': feature_importance
     }
     
-    metadata_file = f"{MODEL_PATH}model_metadata.json"
+    metadata_file = os.path.join(models_dir, 'model_metadata.json')
     with open(metadata_file, 'w') as f:
         json.dump(metadata, f, indent=2)
     print(f"Metadata saved: {metadata_file}")

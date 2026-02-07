@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seattle Parking Map - No Overlapping (10 Zones)</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Marker Cluster CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+        }
+
+        #map {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* Custom marker styles */
+        .custom-marker {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 4px solid white;
+        }
+
+        .custom-marker:hover {
+            transform: scale(1.25);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.5);
+            z-index: 1000 !important;
+        }
+
+        .marker-inner {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.15);
+                opacity: 0.8;
+            }
+        }
+
+        /* Popup styles */
+        .leaflet-popup-content-wrapper {
+            border-radius: 12px;
+            padding: 0;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .leaflet-popup-content {
+            margin: 0;
+            min-width: 280px;
+        }
+
+        .popup-header {
+            padding: 16px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .popup-header h3 {
+            margin: 0 0 4px 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .zone-id-badge {
+            display: inline-block;
+            font-size: 11px;
+            color: #6b7280;
+            background: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            border: 1px solid #e5e7eb;
+        }
+
+        .popup-body {
+            padding: 16px;
+        }
+
+        .availability-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .stat-box {
+            background: #f9fafb;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .popup-footer {
+            padding: 12px 16px;
+            border-top: 1px solid #e5e7eb;
+            background: #f9fafb;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .view-details-btn {
+            width: 100%;
+            padding: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .view-details-btn:hover {
+            background: #5568d3;
+        }
+
+        /* Map controls */
+        .map-legend {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .map-legend h3 {
+            margin: 0 0 12px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2937;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .legend-items {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            color: #4b5563;
+        }
+
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            border: 3px solid white;
+        }
+
+        .header-card {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border-radius: 12px;
+            padding: 16px 32px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            text-align: center;
+        }
+
+        .header-card h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0 0 4px 0;
+        }
+
+        .header-card p {
+            font-size: 13px;
+            color: #6b7280;
+            margin: 0;
+        }
+
+        .zone-count-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 12px;
+            padding: 16px 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            text-align: center;
+        }
+
+        .zone-count-badge .count {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+            line-height: 1;
+        }
+
+        .zone-count-badge .label {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        .info-note {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            max-width: 250px;
+        }
+
+        .info-note h3 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .info-note p {
+            margin: 0;
+            font-size: 12px;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+
+        /* Loading screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loader {
+            text-align: center;
+        }
+
+        .loader-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e5e7eb;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loader p {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        /* Marker cluster styles */
+        .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large {
+            background-color: rgba(102, 126, 234, 0.6);
+        }
+
+        .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div {
+            background-color: rgba(102, 126, 234, 0.8);
+            color: white;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loading">
+        <div class="loader">
+            <div class="loader-spinner"></div>
+            <p>Loading Seattle Map...</p>
+        </div>
+    </div>
+
+    <!-- Map Container -->
+    <div id="map"></div>
+
+    <!-- Header -->
+    <div class="header-card">
+        <h1>🅿️ Seattle Smart Parking</h1>
+        <p>No Overlapping Zones - Well Distributed</p>
+    </div>
+
+    <!-- Zone Counter -->
+    <div class="zone-count-badge">
+        <div class="count">10</div>
+        <div class="label">Zones</div>
+    </div>
+
+    <!-- Legend -->
+    <div class="map-legend">
+        <h3>Availability</h3>
+        <div class="legend-items">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #10b981;"></div>
+                <span><strong>High</strong> (&lt;50% full)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #f59e0b;"></div>
+                <span><strong>Medium</strong> (50-80% full)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #ef4444;"></div>
+                <span><strong>Low</strong> (&gt;80% full)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Note -->
+    <div class="info-note">
+        <h3>✨ No Overlap</h3>
+        <p>Zones are well-separated. Zoom in to see precise locations. Clusters split when you zoom in!</p>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Marker Cluster Plugin -->
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+    <script>
+        // 10 zones with WELL-SEPARATED coordinates (no overlap)
+        const zones = [
+            // Downtown - spread out
+            {
+                id: 'BF_001',
+                name: 'Downtown Pike St',
+                lat: 47.6105,
+                lng: -122.3380,
+                occupancy: 70,
+                available: 6,
+                total: 20,
+                confidence: 85,
+                color: '#f59e0b'
+            },
+            {
+                id: 'BF_002',
+                name: 'Downtown 1st Ave',
+                lat: 47.6050,
+                lng: -122.3350,
+                occupancy: 45,
+                available: 10,
+                total: 18,
+                confidence: 82,
+                color: '#10b981'
+            },
+            {
+                id: 'BF_003',
+                name: 'Downtown 3rd Ave',
+                lat: 47.6080,
+                lng: -122.3310,
+                occupancy: 85,
+                available: 3,
+                total: 22,
+                confidence: 88,
+                color: '#ef4444'
+            },
+            
+            // Stadium District - well separated
+            {
+                id: 'BF_045',
+                name: 'Stadium District - Occidental',
+                lat: 47.5920,
+                lng: -122.3330,
+                occupancy: 90,
+                available: 3,
+                total: 35,
+                confidence: 91,
+                color: '#ef4444'
+            },
+            {
+                id: 'BF_046',
+                name: 'Stadium District - 1st Ave S',
+                lat: 47.5970,
+                lng: -122.3280,
+                occupancy: 88,
+                available: 4,
+                total: 30,
+                confidence: 89,
+                color: '#ef4444'
+            },
+            
+            // Capitol Hill - spread out
+            {
+                id: 'BF_120',
+                name: 'Capitol Hill - Broadway',
+                lat: 47.6240,
+                lng: -122.3210,
+                occupancy: 65,
+                available: 9,
+                total: 25,
+                confidence: 84,
+                color: '#f59e0b'
+            },
+            {
+                id: 'BF_121',
+                name: 'Capitol Hill - Pike St',
+                lat: 47.6180,
+                lng: -122.3150,
+                occupancy: 40,
+                available: 12,
+                total: 20,
+                confidence: 80,
+                color: '#10b981'
+            },
+            
+            // University District - well separated
+            {
+                id: 'BF_200',
+                name: 'University District - University Way',
+                lat: 47.6650,
+                lng: -122.3130,
+                occupancy: 55,
+                available: 13,
+                total: 28,
+                confidence: 83,
+                color: '#f59e0b'
+            },
+            {
+                id: 'BF_201',
+                name: 'University District - 45th St',
+                lat: 47.6590,
+                lng: -122.3080,
+                occupancy: 35,
+                available: 16,
+                total: 24,
+                confidence: 79,
+                color: '#10b981'
+            },
+            
+            // Fremont - isolated
+            {
+                id: 'BF_202',
+                name: 'Fremont - Fremont Ave',
+                lat: 47.6505,
+                lng: -122.3493,
+                occupancy: 50,
+                available: 9,
+                total: 18,
+                confidence: 81,
+                color: '#10b981'
+            }
+        ];
+
+        // Initialize map centered on Seattle
+        const map = L.map('map').setView([47.6205, -122.3321], 12);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Create marker cluster group (prevents overlap, splits on zoom)
+        const markers = L.markerClusterGroup({
+            spiderfyOnMaxZoom: true,
+            showCoverageOnHover: false,
+            zoomToBoundsOnClick: true,
+            maxClusterRadius: 50, // Smaller radius = less clustering
+            disableClusteringAtZoom: 15 // Disable clustering when zoomed in
+        });
+
+        // Add zones as markers
+        zones.forEach(zone => {
+            // Create custom div icon
+            const markerIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `
+                    <div class="custom-marker" style="background-color: ${zone.color};">
+                        <div class="marker-inner" style="background-color: ${zone.color};"></div>
+                    </div>
+                `,
+                iconSize: [45, 45],
+                iconAnchor: [22.5, 22.5]
+            });
+
+            // Create marker
+            const marker = L.marker([zone.lat, zone.lng], { icon: markerIcon });
+
+            // Create popup content
+            const availabilityLevel = zone.occupancy < 50 ? 'High' : zone.occupancy < 80 ? 'Medium' : 'Low';
+            const popupContent = `
+                <div class="popup-header">
+                    <h3>${zone.name}</h3>
+                    <span class="zone-id-badge">${zone.id}</span>
+                </div>
+                <div class="popup-body">
+                    <div class="availability-badge" style="background-color: ${zone.color};">
+                        ${availabilityLevel} Availability
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-label">Available</div>
+                            <div class="stat-value">${zone.available}/${zone.total}</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Occupancy</div>
+                            <div class="stat-value">${zone.occupancy}%</div>
+                        </div>
+                    </div>
+                    <div class="stats-grid" style="margin-top: 8px;">
+                        <div class="stat-box">
+                            <div class="stat-label">Confidence</div>
+                            <div class="stat-value">${zone.confidence}%</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Capacity</div>
+                            <div class="stat-value">${zone.total}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="popup-footer">
+                    <button class="view-details-btn" onclick="alert('View detailed predictions for ${zone.name}')">
+                        View Details & Predictions →
+                    </button>
+                </div>
+            `;
+
+            marker.bindPopup(popupContent, {
+                maxWidth: 300,
+                className: 'custom-popup'
+            });
+
+            // Add marker to cluster group
+            markers.addLayer(marker);
+        });
+
+        // Add cluster group to map
+        map.addLayer(markers);
+
+        // Hide loading screen after map loads
+        map.whenReady(function() {
+            setTimeout(() => {
+                document.getElementById('loading').classList.add('hidden');
+            }, 500);
+        });
+
+        // Add scale control
+        L.control.scale({ imperial: true, metric: true }).addTo(map);
+    </script>
+</body>
+</html>

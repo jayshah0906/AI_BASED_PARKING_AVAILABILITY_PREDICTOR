@@ -43,13 +43,18 @@ class Settings(BaseSettings):
     USE_ML_MODEL: bool = os.getenv("USE_ML_MODEL", "true").lower() in ("true", "1", "yes")
     ML_MODEL_PATH: str = os.getenv("ML_MODEL_PATH", _ml_paths()["model"])
     ML_DATA_DIR: str = os.getenv("ML_DATA_DIR", _ml_paths()["data_dir"])
-    # Map backend zone_id (1-5) to ML zone_id (e.g. BF_001)
+    # Map backend zone_id (1-10) to ML zone_id (e.g. BF_001)
     ML_ZONE_ID_MAP: dict = {
-        1: "BF_001",
-        2: "BF_002",
-        3: "BF_003",
-        4: "BF_120",
-        5: "BF_200",
+        1: "BF_001",  # Downtown Pike St
+        2: "BF_002",  # Downtown 1st Ave
+        3: "BF_003",  # Downtown 3rd Ave
+        4: "BF_120",  # Capitol Hill - Broadway
+        5: "BF_200",  # University District - University Way
+        6: "BF_045",  # Stadium District - Occidental
+        7: "BF_046",  # Stadium District - 1st Ave S
+        8: "BF_121",  # Capitol Hill - Pike St
+        9: "BF_201",  # University District - 45th St
+        10: "BF_202", # Fremont - Fremont Ave
     }
     
     # Data Paths
@@ -70,11 +75,16 @@ class Settings(BaseSettings):
     
     # Zone Settings
     DEFAULT_ZONES: list = [
-        {"id": 1, "name": "Downtown", "lat": 40.7128, "lng": -74.0060},
-        {"id": 2, "name": "Business District", "lat": 40.7589, "lng": -73.9851},
-        {"id": 3, "name": "Shopping Mall", "lat": 40.7505, "lng": -73.9934},
-        {"id": 4, "name": "Residential Area", "lat": 40.7282, "lng": -73.9942},
-        {"id": 5, "name": "University Campus", "lat": 40.8075, "lng": -73.9625},
+        {"id": 1, "name": "Downtown Pike St", "lat": 47.6105, "lng": -122.3380},
+        {"id": 2, "name": "Downtown 1st Ave", "lat": 47.6050, "lng": -122.3350},
+        {"id": 3, "name": "Downtown 3rd Ave", "lat": 47.6080, "lng": -122.3310},
+        {"id": 4, "name": "Capitol Hill - Broadway", "lat": 47.6240, "lng": -122.3210},
+        {"id": 5, "name": "University District - University Way", "lat": 47.6650, "lng": -122.3130},
+        {"id": 6, "name": "Stadium District - Occidental", "lat": 47.5920, "lng": -122.3330},
+        {"id": 7, "name": "Stadium District - 1st Ave S", "lat": 47.5970, "lng": -122.3280},
+        {"id": 8, "name": "Capitol Hill - Pike St", "lat": 47.6180, "lng": -122.3150},
+        {"id": 9, "name": "University District - 45th St", "lat": 47.6590, "lng": -122.3080},
+        {"id": 10, "name": "Fremont - Fremont Ave", "lat": 47.6505, "lng": -122.3493},
     ]
     
     class Config:

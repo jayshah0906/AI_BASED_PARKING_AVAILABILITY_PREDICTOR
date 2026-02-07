@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seattle Parking Map Preview - 10 Zones</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+        }
+
+        .interactive-map {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+
+        /* Map Background */
+        .map-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.3;
+        }
+
+        /* Neighborhood Labels */
+        .neighborhood-label {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 18px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            pointer-events: none;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            transform: translate(-50%, -50%);
+        }
+
+        /* Zone Markers */
+        .zone-marker {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .zone-marker:hover {
+            z-index: 100;
+            transform: translate(-50%, -50%) scale(1.15);
+        }
+
+        /* Zone Circle */
+        .zone-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: white;
+            box-shadow: 
+                0 4px 20px rgba(0, 0, 0, 0.2),
+                0 0 0 4px rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .zone-marker:hover .zone-circle {
+            box-shadow: 
+                0 8px 30px rgba(0, 0, 0, 0.3),
+                0 0 0 6px rgba(255, 255, 255, 0.4);
+        }
+
+        /* Pulse Animation */
+        .zone-pulse {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.7;
+            }
+        }
+
+        /* Zone Tooltip */
+        .zone-tooltip {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            padding: 0;
+            min-width: 280px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .zone-marker:hover .zone-tooltip {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .tooltip-header {
+            padding: 16px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tooltip-header h4 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .zone-id {
+            font-size: 12px;
+            color: #6b7280;
+            background: #f3f4f6;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .tooltip-body {
+            padding: 16px;
+        }
+
+        .availability-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .stats {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+
+        .stat .label {
+            color: #6b7280;
+        }
+
+        .stat .value {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .tooltip-footer {
+            padding: 12px 16px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .view-details-btn {
+            width: 100%;
+            padding: 8px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .view-details-btn:hover {
+            background: #5568d3;
+        }
+
+        /* Map Legend */
+        .map-legend {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            z-index: 50;
+        }
+
+        .map-legend h3 {
+            margin: 0 0 12px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2937;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .legend-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            color: #4b5563;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Zone Count Badge */
+        .zone-count-badge {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: white;
+            border-radius: 12px;
+            padding: 16px 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 50;
+        }
+
+        .zone-count-badge .count {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+            line-height: 1;
+        }
+
+        .zone-count-badge .label {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        /* Header */
+        .preview-header {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            background: white;
+            border-radius: 12px;
+            padding: 16px 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            z-index: 50;
+        }
+
+        .preview-header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0 0 4px 0;
+        }
+
+        .preview-header p {
+            font-size: 13px;
+            color: #6b7280;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="interactive-map">
+        <!-- Map Background -->
+        <div class="map-background"></div>
+
+        <!-- Header -->
+        <div class="preview-header">
+            <h1>🅿️ Seattle Smart Parking</h1>
+            <p>Interactive Map Preview - 10 Zones</p>
+        </div>
+
+        <!-- Neighborhood Labels -->
+        <div class="neighborhood-label" style="left: 50%; top: 48%;">Downtown</div>
+        <div class="neighborhood-label" style="left: 48%; top: 58%;">Stadium District</div>
+        <div class="neighborhood-label" style="left: 55%; top: 43%;">Capitol Hill</div>
+        <div class="neighborhood-label" style="left: 52%; top: 23%;">University District</div>
+        <div class="neighborhood-label" style="left: 45%; top: 33%;">Fremont</div>
+
+        <!-- Zone Markers (10 zones) -->
+        <div id="zones-container"></div>
+
+        <!-- Map Legend -->
+        <div class="map-legend">
+            <h3>Parking Availability</h3>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #10b981;"></div>
+                    <span>High (&lt;50% full)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #f59e0b;"></div>
+                    <span>Medium (50-80% full)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #ef4444;"></div>
+                    <span>Low (&gt;80% full)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Zone Count Badge -->
+        <div class="zone-count-badge">
+            <span class="count">10</span>
+            <span class="label">Zones</span>
+        </div>
+    </div>
+
+    <script>
+        // 10 zones with real data from your ML model
+        const zones = [
+            {
+                id: 'BF_001',
+                name: 'Downtown Pike St',
+                position: { left: '50%', top: '50%' },
+                occupancy: 70,
+                available: 6,
+                total: 20,
+                confidence: 85,
+                color: '#f59e0b' // Medium
+            },
+            {
+                id: 'BF_002',
+                name: 'Downtown 1st Ave',
+                position: { left: '51%', top: '47%' },
+                occupancy: 45,
+                available: 10,
+                total: 18,
+                confidence: 82,
+                color: '#10b981' // High
+            },
+            {
+                id: 'BF_003',
+                name: 'Downtown 3rd Ave',
+                position: { left: '49%', top: '49%' },
+                occupancy: 85,
+                available: 3,
+                total: 22,
+                confidence: 88,
+                color: '#ef4444' // Low
+            },
+            {
+                id: 'BF_045',
+                name: 'Stadium District - Occidental',
+                position: { left: '48%', top: '60%' },
+                occupancy: 90,
+                available: 3,
+                total: 35,
+                confidence: 91,
+                color: '#ef4444' // Low
+            },
+            {
+                id: 'BF_046',
+                name: 'Stadium District - 1st Ave S',
+                position: { left: '47%', top: '57%' },
+                occupancy: 88,
+                available: 4,
+                total: 30,
+                confidence: 89,
+                color: '#ef4444' // Low
+            },
+            {
+                id: 'BF_120',
+                name: 'Capitol Hill - Broadway',
+                position: { left: '55%', top: '45%' },
+                occupancy: 65,
+                available: 9,
+                total: 25,
+                confidence: 84,
+                color: '#f59e0b' // Medium
+            },
+            {
+                id: 'BF_121',
+                name: 'Capitol Hill - Pike St',
+                position: { left: '56%', top: '42%' },
+                occupancy: 40,
+                available: 12,
+                total: 20,
+                confidence: 80,
+                color: '#10b981' // High
+            },
+            {
+                id: 'BF_200',
+                name: 'University District - University Way',
+                position: { left: '52%', top: '25%' },
+                occupancy: 55,
+                available: 13,
+                total: 28,
+                confidence: 83,
+                color: '#f59e0b' // Medium
+            },
+            {
+                id: 'BF_201',
+                name: 'University District - 45th St',
+                position: { left: '53%', top: '22%' },
+                occupancy: 35,
+                available: 16,
+                total: 24,
+                confidence: 79,
+                color: '#10b981' // High
+            },
+            {
+                id: 'BF_202',
+                name: 'Fremont - Fremont Ave',
+                position: { left: '45%', top: '35%' },
+                occupancy: 50,
+                available: 9,
+                total: 18,
+                confidence: 81,
+                color: '#10b981' // High
+            }
+        ];
+
+        // Render zones
+        const container = document.getElementById('zones-container');
+        
+        zones.forEach(zone => {
+            const marker = document.createElement('div');
+            marker.className = 'zone-marker';
+            marker.style.left = zone.position.left;
+            marker.style.top = zone.position.top;
+            
+            marker.innerHTML = `
+                <div class="zone-circle">
+                    <div class="zone-pulse" style="background-color: ${zone.color};"></div>
+                </div>
+                <div class="zone-tooltip">
+                    <div class="tooltip-header">
+                        <h4>${zone.name}</h4>
+                        <span class="zone-id">${zone.id}</span>
+                    </div>
+                    <div class="tooltip-body">
+                        <div class="availability-badge" style="background-color: ${zone.color};">
+                            ${zone.occupancy < 50 ? 'High' : zone.occupancy < 80 ? 'Medium' : 'Low'} Availability
+                        </div>
+                        <div class="stats">
+                            <div class="stat">
+                                <span class="label">Available:</span>
+                                <span class="value">${zone.available}/${zone.total} spaces</span>
+                            </div>
+                            <div class="stat">
+                                <span class="label">Occupancy:</span>
+                                <span class="value">${zone.occupancy}%</span>
+                            </div>
+                            <div class="stat">
+                                <span class="label">Confidence:</span>
+                                <span class="value">${zone.confidence}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tooltip-footer">
+                        <button class="view-details-btn">View Details →</button>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(marker);
+        });
+
+        // Add click animation
+        document.querySelectorAll('.view-details-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                alert('This would open detailed zone information in the real app!');
+            });
+        });
+    </script>
+</body>
+</html>

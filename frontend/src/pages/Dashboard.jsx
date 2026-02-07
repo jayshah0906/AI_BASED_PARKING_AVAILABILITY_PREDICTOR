@@ -12,7 +12,7 @@ const Dashboard = () => {
   const [selectedZone, setSelectedZone] = useState(null)
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [hour, setHour] = useState(new Date().getHours())
-  
+
   const { makePrediction, loading, error, prediction } = usePrediction()
 
   useEffect(() => {
@@ -58,7 +58,7 @@ const Dashboard = () => {
                 selectedZone={selectedZone}
                 onZoneSelect={handleZoneChange}
               />
-              
+
               <ZoneSelector
                 zones={zones}
                 selectedZone={selectedZone}

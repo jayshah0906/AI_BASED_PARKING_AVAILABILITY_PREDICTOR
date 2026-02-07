@@ -13,9 +13,17 @@ from app.models.prediction_model import AvailabilityLevel
 
 def _ml_src_path():
     """Path to ml/src for importing ML predict module."""
-    backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    # Get the directory containing this file (services/)
+    services_dir = os.path.dirname(os.path.abspath(__file__))
+    # Go up to app/
+    app_dir = os.path.dirname(services_dir)
+    # Go up to backend/
+    backend_dir = os.path.dirname(app_dir)
+    # Go up to project root
     project_root = os.path.dirname(backend_dir)
-    return os.path.join(project_root, "ml", "src")
+    # Return ml/src path
+    ml_src = os.path.join(project_root, "ml", "src")
+    return ml_src
 
 
 class PredictionService:
@@ -80,7 +88,7 @@ class PredictionService:
                         data_dir=self._ml_data_dir,
                     )
                     occupancy = result.get("occupancy_percent", result.get("occupancy_rate", 0.5) * 100)
-                    confidence = result.get("confidence", 85)
+                    confidence = result.get("confidence", 85) / 100.0  # Convert to 0-1 range
                     availability_level = self._occupancy_to_availability(occupancy)
                     return {
                         "occupancy": round(occupancy, 1),

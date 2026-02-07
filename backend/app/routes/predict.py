@@ -29,6 +29,24 @@ async def predict_availability(
     else:
         zone_name = zone.name
     
+    # Get zone capacity from ML config
+    from app.config import settings
+    ml_zone_id = settings.ML_ZONE_ID_MAP.get(request.zone_id)
+    
+    # Import ML config to get capacity
+    import sys
+    import os
+    ml_src = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "ml", "src")
+    if ml_src not in sys.path:
+        sys.path.insert(0, ml_src)
+    
+    try:
+        from config import ZONE_METADATA
+        zone_metadata = ZONE_METADATA.get(ml_zone_id, {})
+        total_spaces = zone_metadata.get('capacity', 20)
+    except:
+        total_spaces = 20  # Default fallback
+    
     # Get events for the zone
     events = await get_events_for_zone(request.zone_id, request.date, db)
     
@@ -40,6 +58,10 @@ async def predict_availability(
         day_of_week=request.day_of_week,
         events=events
     )
+    
+    # Calculate available spaces
+    occupancy_rate = prediction_result["occupancy"] / 100.0
+    available_spaces = int((1 - occupancy_rate) * total_spaces)
     
     # Build factors dictionary
     features = prediction_result["features"]
@@ -70,6 +92,8 @@ async def predict_availability(
         availability_level=prediction_result["availability_level"],
         confidence_score=prediction_result["confidence"],
         predicted_occupancy=prediction_result["occupancy"],
+        available_spaces=available_spaces,
+        total_spaces=total_spaces,
         timestamp=timestamp,
         factors=factors
     )

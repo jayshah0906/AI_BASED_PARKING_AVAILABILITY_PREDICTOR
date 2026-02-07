@@ -56,7 +56,7 @@ def get_historical_features(zone_id, target_dt, historical_df):
         avg_same_hour = zone_data['occupancy_rate'].mean() if len(zone_data) > 0 else 0.5
         std_same_hour = 0.15
     
-    # Calculate 24h trend
+    # Calculate 24h trend (use relative matching if no exact data)
     recent_data = historical_df[
         (historical_df['blockface_id'] == zone_id) &
         (historical_df['datetime'] >= target_dt - timedelta(hours=24)) &
@@ -66,7 +66,19 @@ def get_historical_features(zone_id, target_dt, historical_df):
     if len(recent_data) >= 2:
         trend_24h = recent_data['occupancy_rate'].iloc[-1] - recent_data['occupancy_rate'].iloc[0]
     else:
-        trend_24h = 0.0
+        # Use historical pattern: compare current hour vs 24h ago (same day of week)
+        current_pattern = same_pattern  # Already filtered above
+        prev_hour = target_hour - 1 if target_hour > 0 else 23
+        prev_pattern = historical_df[
+            (historical_df['blockface_id'] == zone_id) &
+            (historical_df['datetime'].dt.hour == prev_hour) &
+            (historical_df['datetime'].dt.weekday == target_weekday)
+        ]
+        
+        if len(current_pattern) > 0 and len(prev_pattern) > 0:
+            trend_24h = current_pattern['occupancy_rate'].mean() - prev_pattern['occupancy_rate'].mean()
+        else:
+            trend_24h = 0.0
     
     return {
         'avg_same_hour': avg_same_hour,
@@ -78,6 +90,7 @@ def get_historical_features(zone_id, target_dt, historical_df):
 def get_lag_features(zone_id, target_dt, historical_df):
     """
     Get occupancy at previous time points (lag features)
+    Uses relative date matching when exact dates aren't available
     
     Args:
         zone_id: Zone identifier
@@ -88,7 +101,8 @@ def get_lag_features(zone_id, target_dt, historical_df):
         dict with lag features
     """
     def get_occupancy_at(dt):
-        """Helper to get occupancy at specific datetime"""
+        """Helper to get occupancy at specific datetime or closest historical match"""
+        # First try exact match (for dates within historical range)
         data = historical_df[
             (historical_df['blockface_id'] == zone_id) &
             (historical_df['datetime'] >= dt - timedelta(minutes=30)) &
@@ -96,7 +110,27 @@ def get_lag_features(zone_id, target_dt, historical_df):
         ]
         if len(data) > 0:
             return data['occupancy_rate'].mean()
-        return 0.5  # Default fallback
+        
+        # If no exact match, use relative matching (same day_of_week + hour from historical data)
+        target_weekday = dt.weekday()
+        target_hour = dt.hour
+        
+        relative_match = historical_df[
+            (historical_df['blockface_id'] == zone_id) &
+            (historical_df['datetime'].dt.weekday == target_weekday) &
+            (historical_df['datetime'].dt.hour == target_hour)
+        ]
+        
+        if len(relative_match) > 0:
+            # Use the most recent matching pattern
+            return relative_match.nlargest(10, 'datetime')['occupancy_rate'].mean()
+        
+        # Final fallback: zone average
+        zone_data = historical_df[historical_df['blockface_id'] == zone_id]
+        if len(zone_data) > 0:
+            return zone_data['occupancy_rate'].mean()
+        
+        return 0.5  # Ultimate fallback
     
     return {
         'occupancy_1h_ago': get_occupancy_at(target_dt - timedelta(hours=1)),

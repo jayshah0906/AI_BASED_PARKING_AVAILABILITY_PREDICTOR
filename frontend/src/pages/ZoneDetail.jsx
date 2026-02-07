@@ -12,7 +12,7 @@ const ZoneDetail = () => {
   const [events, setEvents] = useState([])
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [hour, setHour] = useState(new Date().getHours())
-  
+
   const { makePrediction, loading, error, prediction } = usePrediction()
 
   useEffect(() => {

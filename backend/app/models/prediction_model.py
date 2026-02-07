@@ -33,6 +33,8 @@ class PredictionResponse(BaseModel):
     availability_level: AvailabilityLevel
     confidence_score: float = Field(..., ge=0.0, le=1.0)
     predicted_occupancy: float = Field(..., ge=0.0, le=100.0, description="Predicted occupancy percentage")
+    available_spaces: int = Field(..., description="Number of available parking spaces")
+    total_spaces: int = Field(..., description="Total parking spaces in zone")
     timestamp: str
     factors: dict = Field(default_factory=dict, description="Factors influencing prediction")
     

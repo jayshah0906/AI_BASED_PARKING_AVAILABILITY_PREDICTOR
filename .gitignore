@@ -43,6 +43,12 @@ Thumbs.db
 *.log
 logs/
 
+# Screenshots and images
+*.png
+*.jpg
+*.jpeg
+!frontend/public/logo1.png
+
 # Model files (but keep the trained model)
 *.h5
 *.model

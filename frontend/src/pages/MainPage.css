@@ -119,8 +119,7 @@
 
 /* Hero Section */
 .uber-hero {
-  background: linear-gradient(rgba(44, 62, 80, 0.85), rgba(44, 62, 80, 0.85)), 
-              url('/seattle-map-bg.jpg');
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
